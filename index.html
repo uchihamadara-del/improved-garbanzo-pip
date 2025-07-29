@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Margin Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .formula-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .interactive-calc {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+        }
+        
+        .calc-title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        input:hover {
+            border-color: #999;
+        }
+        
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .dropdown-item {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .category-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .show {
+            display: block;
+        }
+        
+        #calc-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 1.2em;
+            border: 2px solid #27ae60;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .result-highlight {
+            color: #27ae60;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .contract-value {
+            color: #3498db;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .note-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 4px solid #f39c12;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        
+        .note-title {
+            color: #d35400;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .formula-box {
+                font-size: 1.1em;
+                padding: 20px;
+            }
+            
+            input {
+                font-size: 1em;
+                padding: 10px;
+            }
+            
+            #calc-result {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-time Margin Calculator</h1>
+        <p class="subtitle">Live calculation as you type - No button needed!</p>
+        
+        <div class="formula-box">
+            <strong>MARGIN = (Contract Size × Lot Size × Current Price) ÷ Leverage</strong>
+        </div>
+        
+        <div class="interactive-calc">
+            <div class="calc-title">🧮 Interactive Margin Calculator</div>
+            
+            <div class="input-group">
+                <label for="price-input">Current Price ($):</label>
+                <input type="number" id="price-input" value="3318" step="0.01" placeholder="Enter current market price">
+            </div>
+            
+            <div class="input-group">
+                <label for="lot-input">Lot Size:</label>
+                <input type="number" id="lot-input" value="1" step="0.01" placeholder="Enter lot size (e.g., 0.01, 0.1, 1)">
+            </div>
+            
+            <div class="input-group">
+                <label for="leverage-input">Leverage (1:X):</label>
+                <input type="number" id="leverage-input" value="500" step="1" placeholder="Enter leverage ratio">
+            </div>
+            
+            <div class="input-group">
+                <label for="category-input">Category:</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="category-input" placeholder="Type to search categories (e.g., metals, forex, crypto...)" autocomplete="off">
+                    <div id="category-dropdown" class="dropdown-content"></div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="contract-input">Contract Size (units):</label>
+                <input type="number" id="contract-input" value="100" step="1" placeholder="Enter contract size">
+            </div>
+            
+            <div id="calc-result">
+                <div class="contract-value">Contract Value: $331,800.00</div>
+                <div class="result-highlight">Required Margin: $663.60</div>
+            </div>
+        </div>
+        
+        <div class="note-box">
+            <div class="note-title">📝 Quick Reference:</div>
+            <ul>
+                <li><strong>Gold (XAUUSD):</strong> Contract size = 100 oz</li>
+                <li><strong>Silver (XAGUSD):</strong> Contract size = 5,000 oz</li>
+                <li><strong>Forex pairs (EUR/USD, GBP/USD):</strong> Contract size = 100,000 units</li>
+                <li><strong>Bitcoin (BTCUSD):</strong> Contract size = 1 BTC</li>
+                <li><strong>Oil (USOIL):</strong> Contract size = 1,000 barrels</li>
+                <li><strong>Indices (SPX500, NAS100):</strong> Contract size varies by broker</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Category database with contract sizes and typical leverage
+        const categories = [
+            {
+                name: "Precious Metals",
+                symbols: ["XAUUSD (Gold)", "XAGUSD (Silver)", "XPTUSD (Platinum)", "XPDUSD (Palladium)"],
+                contractSizes: {"XAUUSD": 100, "XAGUSD": 5000, "XPTUSD": 10, "XPDUSD": 10},
+                description: "Gold, Silver, Platinum, Palladium - Safe haven assets"
+            },
+            {
+                name: "Major Forex Pairs",
+                symbols: ["EURUSD", "GBPUSD", "USDJPY", "USDCHF", "AUDUSD", "USDCAD", "NZDUSD"],
+                contractSizes: {"default": 100000},
+                description: "Major currency pairs with high liquidity"
+            },
+            {
+                name: "Minor Forex Pairs",
+                symbols: ["EURGBP", "EURJPY", "EURCHF", "GBPJPY", "GBPCHF", "AUDJPY", "CADJPY"],
+                contractSizes: {"default": 100000},
+                description: "Cross currency pairs without USD"
+            },
+            {
+                name: "Exotic Forex Pairs",
+                symbols: ["USDTRY", "USDZAR", "USDMXN", "USDBRL", "EURPLN", "GBPTRY", "AUDZAR"],
+                contractSizes: {"default": 100000},
+                description: "Currency pairs with emerging market currencies"
+            },
+            {
+                name: "Major Cryptocurrencies",
+                symbols: ["BTCUSD (Bitcoin)", "ETHUSD (Ethereum)", "BNBUSD (Binance Coin)", "ADAUSD (Cardano)"],
+                contractSizes: {"BTCUSD": 1, "ETHUSD": 1, "BNBUSD": 1, "ADAUSD": 1},
+                description: "Top cryptocurrencies by market cap"
+            },
+            {
+                name: "Altcoins",
+                symbols: ["LTCUSD (Litecoin)", "BCHUSD (Bitcoin Cash)", "SOLUSD (Solana)", "DOTUSD (Polkadot)", "LINKUSD (Chainlink)"],
+                contractSizes: {"default": 1},
+                description: "Alternative cryptocurrencies"
+            },
+            {
+                name: "Energy Commodities",
+                symbols: ["USOIL (WTI Crude)", "UKOIL (Brent Crude)", "NATGAS (Natural Gas)", "GASOIL (Gas Oil)"],
+                contractSizes: {"USOIL": 1000, "UKOIL": 1000, "NATGAS": 10000, "GASOIL": 100},
+                description: "Oil, gas and energy-related commodities"
+            },
+            {
+                name: "Agricultural Commodities",
+                symbols: ["WHEAT", "CORN", "SOYBEAN", "SUGAR", "COFFEE", "COCOA", "COTTON"],
+                contractSizes: {"WHEAT": 5000, "CORN": 5000, "SOYBEAN": 5000, "SUGAR": 112000, "COFFEE": 37500, "COCOA": 10, "COTTON": 50000},
+                description: "Soft commodities and agricultural products"
+            },
+            {
+                name: "US Stock Indices",
+                symbols: ["SPX500 (S&P 500)", "NAS100 (Nasdaq 100)", "US30 (Dow Jones)", "US2000 (Russell 2000)"],
+                contractSizes: {"SPX500": 1, "NAS100": 1, "US30": 1, "US2000": 1},
+                description: "Major US stock market indices"
+            },
+            {
+                name: "European Stock Indices",
+                symbols: ["GER40 (DAX)", "UK100 (FTSE 100)", "FRA40 (CAC 40)", "SPA35 (IBEX 35)", "ITA40 (FTSE MIB)"],
+                contractSizes: {"default": 1},
+                description: "Major European stock market indices"
+            },
+            {
+                name: "Asian Stock Indices",
+                symbols: ["JPN225 (Nikkei 225)", "HK50 (Hang Seng)", "AUS200 (ASX 200)", "CHINA50 (FTSE China A50)"],
+                contractSizes: {"default": 1},
+                description: "Major Asian-Pacific stock market indices"
+            },
+            {
+                name: "Individual Stocks CFDs",
+                symbols: ["AAPL", "GOOGL", "MSFT", "TSLA", "AMZN", "META", "NVDA", "NFLX"],
+                contractSizes: {"default": 1},
+                description: "CFDs on major individual stocks"
+            },
+            {
+                name: "Bonds",
+                symbols: ["US10Y (10-Year Treasury)", "GER10Y (German Bund)", "UK10Y (UK Gilt)", "JPN10Y (Japanese Bond)"],
+                contractSizes: {"default": 1000},
+                description: "Government bonds and treasury securities"
+            },
+            {
+                name: "Volatility Indices",
+                symbols: ["VIX (CBOE Volatility Index)", "VXX (Volatility ETF)", "VSTOXX (Euro Volatility)"],
+                contractSizes: {"default": 1000},
+                description: "Market volatility and fear indices"
+            }
+        ];
+
+        function filterCategories(input) {
+            return categories.filter(category => 
+                category.name.toLowerCase().includes(input.toLowerCase()) ||
+                category.description.toLowerCase().includes(input.toLowerCase()) ||
+                category.symbols.some(symbol => 
+                    symbol.toLowerCase().includes(input.toLowerCase())
+                )
+            );
+        }
+
+        function showDropdown(filteredCategories) {
+            const dropdown = document.getElementById('category-dropdown');
+            dropdown.innerHTML = '';
+            
+            if (filteredCategories.length === 0) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            filteredCategories.forEach(category => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.innerHTML = `
+                    <strong>${category.name}</strong>
+                    <div class="category-info">${category.description}</div>
+                    <div class="category-info">Symbols: ${category.symbols.slice(0, 3).join(', ')}${category.symbols.length > 3 ? '...' : ''}</div>
+                `;
+                item.addEventListener('click', () => selectCategory(category));
+                dropdown.appendChild(item);
+            });
+            
+            dropdown.style.display = 'block';
+        }
+
+        function selectCategory(category) {
+            const categoryInput = document.getElementById('category-input');
+            const contractInput = document.getElementById('contract-input');
+            
+            categoryInput.value = category.name;
+            
+            // Set default contract size based on category
+            if (category.contractSizes.default) {
+                contractInput.value = category.contractSizes.default;
+            } else {
+                // Use the first symbol's contract size as default
+                const firstSymbol = Object.keys(category.contractSizes)[0];
+                contractInput.value = category.contractSizes[firstSymbol];
+            }
+            
+            document.getElementById('category-dropdown').style.display = 'none';
+            calculateMargin();
+        }
+
+        function calculateMargin() {
+            const price = parseFloat(document.getElementById('price-input').value) || 0;
+            const lotSize = parseFloat(document.getElementById('lot-input').value) || 0;
+            const leverage = parseFloat(document.getElementById('leverage-input').value) || 1;
+            const contractSize = parseFloat(document.getElementById('contract-input').value) || 0;
+            
+            if (price && lotSize && leverage && contractSize) {
+                const contractValue = contractSize * lotSize * price;
+                const margin = contractValue / leverage;
+                
+                document.getElementById('calc-result').innerHTML = `
+                    <div class="contract-value">Contract Value: ${contractValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="result-highlight">Required Margin: ${margin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                `;
+            } else if (price === 0 || lotSize === 0 || leverage === 0 || contractSize === 0) {
+                document.getElementById('calc-result').innerHTML = `
+                    <div class="contract-value">Contract Value: $0.00</div>
+                    <div class="result-highlight">Required Margin: $0.00</div>
+                `;
+            } else {
+                document.getElementById('calc-result').innerHTML = `
+                    <div style="color: #e74c3c;">Please enter valid numbers in all fields</div>
+                `;
+            }
+        }
+        
+        // Category input autocomplete functionality
+        document.getElementById('category-input').addEventListener('input', function(e) {
+            const input = e.target.value;
+            if (input.length === 0) {
+                document.getElementById('category-dropdown').style.display = 'none';
+                return;
+            }
+            
+            const filtered = filterCategories(input);
+            showDropdown(filtered);
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-container')) {
+                document.getElementById('category-dropdown').style.display = 'none';
+            }
+        });
+
+        // Add event listeners for real-time calculation
+        document.getElementById('price-input').addEventListener('input', calculateMargin);
+        document.getElementById('lot-input').addEventListener('input', calculateMargin);
+        document.getElementById('leverage-input').addEventListener('input', calculateMargin);
+        document.getElementById('contract-input').addEventListener('input', calculateMargin);
+        
+        // Calculate on page load
+        calculateMargin();
+        
+        // Add smooth animation when inputs change
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const resultDiv = document.getElementById('calc-result');
+                resultDiv.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    resultDiv.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+    </script>
+</body>
+</html>
