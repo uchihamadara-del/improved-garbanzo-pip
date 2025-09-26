@@ -241,7 +241,7 @@
             <div class="input-group">
                 <label for="category-input">Category:</label>
                 <div class="autocomplete-container">
-                    <input type="text" id="category-input" placeholder="Type to search categories (e.g., metals, forex, crypto...)" autocomplete="off">
+                    <input type="text" id="category-input" placeholder="Type to search categories (e.g., cash index, metals, forex...)" autocomplete="off">
                     <div id="category-dropdown" class="dropdown-content"></div>
                 </div>
             </div>
@@ -260,12 +260,13 @@
         <div class="note-box">
             <div class="note-title">📝 Quick Reference:</div>
             <ul>
+                <li><strong>Cash Indices (F40, UK100):</strong> Contract size = 1 unit</li>
                 <li><strong>Gold (XAUUSD):</strong> Contract size = 100 oz</li>
                 <li><strong>Silver (XAGUSD):</strong> Contract size = 5,000 oz</li>
                 <li><strong>Forex pairs (EUR/USD, GBP/USD):</strong> Contract size = 100,000 units</li>
                 <li><strong>Bitcoin (BTCUSD):</strong> Contract size = 1 BTC</li>
                 <li><strong>Oil (USOIL):</strong> Contract size = 1,000 barrels</li>
-                <li><strong>Indices (SPX500, NAS100):</strong> Contract size varies by broker</li>
+                <li><strong>Traditional Indices (SPX500, NAS100):</strong> Contract size varies by broker</li>
             </ul>
         </div>
     </div>
@@ -273,6 +274,12 @@
     <script>
         // Category database with contract sizes and typical leverage
         const categories = [
+            {
+                name: "Cash Indices",
+                symbols: ["AUS200", "DE40", "ESP35", "F40", "STOXX50", "UK100", "US30", "US500", "USTEC"],
+                contractSizes: {"AUS200": 1, "DE40": 1, "ESP35": 1, "F40": 1, "STOXX50": 1, "UK100": 1, "US30": 1, "US500": 1, "USTEC": 1},
+                description: "Cash index CFDs with optimized risk management and low margin requirements"
+            },
             {
                 name: "Precious Metals",
                 symbols: ["XAUUSD (Gold)", "XAGUSD (Silver)", "XPTUSD (Platinum)", "XPDUSD (Palladium)"],
@@ -423,8 +430,8 @@
                 const margin = contractValue / leverage;
                 
                 document.getElementById('calc-result').innerHTML = `
-                    <div class="contract-value">Contract Value: ${contractValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                    <div class="result-highlight">Required Margin: ${margin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="contract-value">Contract Value: $${contractValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="result-highlight">Required Margin: $${margin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 `;
             } else if (price === 0 || lotSize === 0 || leverage === 0 || contractSize === 0) {
                 document.getElementById('calc-result').innerHTML = `
